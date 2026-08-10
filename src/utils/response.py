@@ -1,15 +1,52 @@
-
 from sdks.novavision.src.helper.package import PackageHelper
-from components.Package.src.models.PackageModel import PackageModel, PackageConfigs, ConfigExecutor, PackageOutputs, PackageResponse, PackageExecutor, OutputImage
+
+from components.MQTTWriter.src.models.PackageModel import (
+    PackageModel,
+    PackageConfigs,
+    ConfigExecutor,
+    PackageOutputs,
+    PackageResponse,
+    MQTTWriterExecutor,
+    ErrorStatusOutput,
+    MessageOutput,
+)
 
 
 def build_response(context):
-    outputImage = OutputImage(value=context.image)
-    Outputs = PackageOutputs(outputImage=outputImage)
-    packageResponse = PackageResponse(outputs=Outputs)
-    packageExecutor = PackageExecutor(value=packageResponse)
-    executor = ConfigExecutor(value=packageExecutor)
-    packageConfigs = PackageConfigs(executor=executor)
-    package = PackageHelper(packageModel=PackageModel, packageConfigs=packageConfigs)
-    packageModel = package.build_model(context)
-    return packageModel
+    error_status = ErrorStatusOutput(
+        value=context.error_status
+    )
+
+    message = MessageOutput(
+        value=context.response_message
+    )
+
+    outputs = PackageOutputs(
+        error_status=error_status,
+        message=message,
+    )
+
+    package_response = PackageResponse(
+        outputs=outputs
+    )
+
+    mqtt_writer_executor = MQTTWriterExecutor(
+        value=package_response
+    )
+
+    executor = ConfigExecutor(
+        value=mqtt_writer_executor
+    )
+
+    package_configs = PackageConfigs(
+        executor=executor
+    )
+
+    package = PackageHelper(
+        packageModel=PackageModel,
+        packageConfigs=package_configs,
+    )
+
+    package_model = package.build_model(context)
+
+    return package_model

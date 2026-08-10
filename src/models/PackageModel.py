@@ -1,44 +1,109 @@
+from pydantic import Field
+from typing import Optional, Union, Literal
 
-from pydantic import Field, validator
-from typing import List, Optional, Union, Literal
-from sdks.novavision.src.base.model import Package, Image, Inputs, Configs, Outputs, Response, Request, Output, Input, Config
-
-
-class InputImage(Input):
-    name: Literal["inputImage"] = "inputImage"
-    value: Union[List[Image], Image]
-    type: str = "object"
-
-    @validator("type", pre=True, always=True)
-    def set_type_based_on_value(cls, value, values):
-        value = values.get('value')
-        if isinstance(value, Image):
-            return "object"
-        elif isinstance(value, list):
-            return "list"
-
-    class Config:
-        title = "Image"
+from sdks.novavision.src.base.model import (
+    Package,
+    Inputs,
+    Configs,
+    Outputs,
+    Response,
+    Request,
+    Output,
+    Input,
+    Config,
+)
 
 
-class OutputImage(Output):
-    name: Literal["outputImage"] = "outputImage"
-    value: Union[List[Image],Image]
-    type: str = "object"
+# ------------------------------------------------------------------
+# INPUTS
+# ------------------------------------------------------------------
 
-    @validator("type", pre=True, always=True)
-    def set_type_based_on_value(cls, value, values):
-        value = values.get('value')
-        if isinstance(value, Image):
-            return "object"
-        elif isinstance(value, list):
-            return "list"
+class MessageInput(Input):
+    """
+    Message that will be published to the MQTT broker.
+    """
+
+    name: Literal["message"] = "message"
+    value: str
+    type: Literal["string"] = "string"
 
     class Config:
-        title = "Image"
+        title = "Message"
 
 
-class KeepSideFalse(Config):
+class PackageInputs(Inputs):
+    message: MessageInput
+
+
+# ------------------------------------------------------------------
+# CONFIGS
+# ------------------------------------------------------------------
+
+class Host(Config):
+    """
+    MQTT broker host address.
+    """
+
+    name: Literal["host"] = "host"
+    value: str
+    type: Literal["string"] = "string"
+    field: Literal["textInput"] = "textInput"
+    placeHolder: Literal["localhost"] = "localhost"
+
+    class Config:
+        title = "Host"
+
+
+class Port(Config):
+    """
+    MQTT broker port.
+    """
+
+    name: Literal["port"] = "port"
+    value: int = Field(default=1883, ge=1, le=65535)
+    type: Literal["number"] = "number"
+    field: Literal["textInput"] = "textInput"
+    placeHolder: Literal["1883"] = "1883"
+
+    class Config:
+        title = "Port"
+
+
+class Topic(Config):
+    """
+    MQTT topic that the message will be published to.
+    """
+
+    name: Literal["topic"] = "topic"
+    value: str
+    type: Literal["string"] = "string"
+    field: Literal["textInput"] = "textInput"
+    placeHolder: Literal["novavision/test"] = "novavision/test"
+
+    class Config:
+        title = "Topic"
+
+
+class QoS(Config):
+    """
+    MQTT Quality of Service level.
+
+    0: At most once
+    1: At least once
+    2: Exactly once
+    """
+
+    name: Literal["qos"] = "qos"
+    value: int = Field(default=0, ge=0, le=2)
+    type: Literal["number"] = "number"
+    field: Literal["textInput"] = "textInput"
+    placeHolder: Literal["0"] = "0"
+
+    class Config:
+        title = "QoS"
+
+
+class RetainFalse(Config):
     name: Literal["False"] = "False"
     value: Literal[False] = False
     type: Literal["bool"] = "bool"
@@ -48,7 +113,7 @@ class KeepSideFalse(Config):
         title = "Disable"
 
 
-class KeepSideTrue(Config):
+class RetainTrue(Config):
     name: Literal["True"] = "True"
     value: Literal[True] = True
     type: Literal["bool"] = "bool"
@@ -58,49 +123,117 @@ class KeepSideTrue(Config):
         title = "Enable"
 
 
-class KeepSideBBox(Config):
+class Retain(Config):
     """
-        Rotate image without catting off sides.
+    Determines whether the broker should retain the published message.
     """
-    name: Literal["KeepSide"] = "KeepSide"
-    value: Union[KeepSideTrue, KeepSideFalse]
+
+    name: Literal["retain"] = "retain"
+    value: Union[RetainFalse, RetainTrue]
     type: Literal["object"] = "object"
     field: Literal["dropdownlist"] = "dropdownlist"
 
     class Config:
-        title = "Keep Sides"
+        title = "Retain"
 
 
-class Degree(Config):
+class Timeout(Config):
     """
-        Positive angles specify counterclockwise rotation while negative angles indicate clockwise rotation.
+    Timeout for MQTT connect and publish operations.
     """
-    name: Literal["Degree"] = "Degree"
-    value: int = Field(ge=-359.0, le=359.0,default=0)
+
+    name: Literal["timeout"] = "timeout"
+    value: float = Field(default=0.5, gt=0)
     type: Literal["number"] = "number"
     field: Literal["textInput"] = "textInput"
-    placeHolder: Literal["[-359, 359]"] = "[-359, 359]"
+    placeHolder: Literal["0.5"] = "0.5"
 
     class Config:
-        title = "Angle"
+        title = "Timeout"
 
 
-class PackageInputs(Inputs):
-    inputImage: InputImage
+class Username(Config):
+    """
+    Optional MQTT broker username.
+    """
+
+    name: Literal["username"] = "username"
+    value: Optional[str] = None
+    type: Literal["string"] = "string"
+    field: Literal["textInput"] = "textInput"
+
+    class Config:
+        title = "Username"
 
 
-class PackageConfigs(Configs):
-    degree: Degree
-    drawBBox: KeepSideBBox
+class Password(Config):
+    """
+    Optional MQTT broker password.
+    """
+
+    name: Literal["password"] = "password"
+    value: Optional[str] = None
+    type: Literal["string"] = "string"
+    field: Literal["textInput"] = "textInput"
+
+    class Config:
+        title = "Password"
+
+
+class MQTTWriterConfigs(Configs):
+    host: Host
+    port: Port
+    topic: Topic
+    qos: QoS
+    retain: Retain
+    timeout: Timeout
+    username: Username
+    password: Password
+
+
+# ------------------------------------------------------------------
+# OUTPUTS
+# ------------------------------------------------------------------
+
+class ErrorStatusOutput(Output):
+    """
+    True when the MQTT publish operation fails.
+    False when the operation succeeds.
+    """
+
+    name: Literal["error_status"] = "error_status"
+    value: bool
+    type: Literal["bool"] = "bool"
+
+    class Config:
+        title = "Error Status"
+
+
+class MessageOutput(Output):
+    """
+    Status message returned after the MQTT publish operation.
+    """
+
+    name: Literal["message"] = "message"
+    value: str
+    type: Literal["string"] = "string"
+
+    class Config:
+        title = "Message"
 
 
 class PackageOutputs(Outputs):
-    outputImage: OutputImage
+    error_status: ErrorStatusOutput
+    message: MessageOutput
 
+
+# ------------------------------------------------------------------
+# REQUEST / RESPONSE
+# ------------------------------------------------------------------
 
 class PackageRequest(Request):
-    inputs: Optional[PackageInputs]
-    configs: PackageConfigs
+    inputs: PackageInputs
+    configs: MQTTWriterConfigs
 
     class Config:
         json_schema_extra = {
@@ -112,14 +245,18 @@ class PackageResponse(Response):
     outputs: PackageOutputs
 
 
-class PackageExecutor(Config):
-    name: Literal["Package"] = "Package"
+# ------------------------------------------------------------------
+# EXECUTOR
+# ------------------------------------------------------------------
+
+class MQTTWriterExecutor(Config):
+    name: Literal["MQTTWriter"] = "MQTTWriter"
     value: Union[PackageRequest, PackageResponse]
     type: Literal["object"] = "object"
     field: Literal["option"] = "option"
 
     class Config:
-        title = "Package"
+        title = "MQTT Writer"
         json_schema_extra = {
             "target": {
                 "value": 0
@@ -129,7 +266,7 @@ class PackageExecutor(Config):
 
 class ConfigExecutor(Config):
     name: Literal["ConfigExecutor"] = "ConfigExecutor"
-    value: Union[PackageExecutor]
+    value: Union[MQTTWriterExecutor]
     type: Literal["executor"] = "executor"
     field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
 
@@ -140,6 +277,10 @@ class ConfigExecutor(Config):
         }
 
 
+# ------------------------------------------------------------------
+# PACKAGE MODEL
+# ------------------------------------------------------------------
+
 class PackageConfigs(Configs):
     executor: ConfigExecutor
 
@@ -147,4 +288,4 @@ class PackageConfigs(Configs):
 class PackageModel(Package):
     configs: PackageConfigs
     type: Literal["component"] = "component"
-    name: Literal["Package"] = "Package"
+    name: Literal["MQTTWriter"] = "MQTTWriter"
