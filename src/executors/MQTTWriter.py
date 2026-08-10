@@ -14,7 +14,6 @@ sys.path.append(
 
 
 from sdks.novavision.src.base.component import Component
-from sdks.novavision.src.helper.executor import Executor
 
 from components.MQTTWriter.src.utils.response import build_response
 from components.MQTTWriter.src.models.PackageModel import PackageModel
@@ -225,5 +224,7 @@ class MQTTWriter(Component):
         return package_model
 
 
-if "__main__" == __name__:
+if __name__ == "__main__":
+    from sdks.novavision.src.helper.executor import Executor
+
     Executor(sys.argv[1]).run()
