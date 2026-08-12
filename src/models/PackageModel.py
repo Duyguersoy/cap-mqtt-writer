@@ -1,26 +1,28 @@
+from typing import Literal, Optional, Union
+
 from pydantic import Field
-from typing import Optional, Union, Literal
 
 from sdks.novavision.src.base.model import (
     Package,
-    Inputs,
-    Configs,
-    Outputs,
-    Response,
-    Request,
-    Output,
     Input,
+    Inputs,
     Config,
+    Configs,
+    Output,
+    Outputs,
+    Request,
+    Response,
 )
 
 
 # ================================================================
-# INPUTS
+# INPUT
 # ================================================================
+
 
 class MessageInput(Input):
     """
-    Message that will be published to the MQTT broker.
+    MQTT broker'a publish edilecek mesaj.
     """
 
     name: Literal["message"] = "message"
@@ -36,19 +38,23 @@ class PackageInputs(Inputs):
 
 
 # ================================================================
-# CONFIGS
+# CONFIG PARAMETERS
 # ================================================================
+
 
 class Host(Config):
     """
-    MQTT broker host address.
+    MQTT broker host adresi.
     """
 
     name: Literal["host"] = "host"
     value: str
     type: Literal["string"] = "string"
     field: Literal["textInput"] = "textInput"
-    placeHolder: Literal["localhost"] = "localhost"
+
+    placeHolder: Literal[
+        "localhost"
+    ] = "localhost"
 
     class Config:
         title = "Host"
@@ -56,14 +62,23 @@ class Host(Config):
 
 class Port(Config):
     """
-    MQTT broker port.
+    MQTT broker portu.
     """
 
     name: Literal["port"] = "port"
-    value: int = Field(default=1883, ge=1, le=65535)
+
+    value: int = Field(
+        default=1883,
+        ge=1,
+        le=65535,
+    )
+
     type: Literal["number"] = "number"
     field: Literal["textInput"] = "textInput"
-    placeHolder: Literal["1883"] = "1883"
+
+    placeHolder: Literal[
+        "1883"
+    ] = "1883"
 
     class Config:
         title = "Port"
@@ -71,14 +86,17 @@ class Port(Config):
 
 class Topic(Config):
     """
-    MQTT topic.
+    Mesajın yayınlanacağı MQTT topic.
     """
 
     name: Literal["topic"] = "topic"
     value: str
     type: Literal["string"] = "string"
     field: Literal["textInput"] = "textInput"
-    placeHolder: Literal["novavision/test"] = "novavision/test"
+
+    placeHolder: Literal[
+        "novavision/test"
+    ] = "novavision/test"
 
     class Config:
         title = "Topic"
@@ -86,7 +104,7 @@ class Topic(Config):
 
 class QoS(Config):
     """
-    MQTT Quality of Service level.
+    MQTT Quality of Service seviyesi.
 
     0 -> At most once
     1 -> At least once
@@ -94,13 +112,27 @@ class QoS(Config):
     """
 
     name: Literal["qos"] = "qos"
-    value: int = Field(default=0, ge=0, le=2)
+
+    value: int = Field(
+        default=0,
+        ge=0,
+        le=2,
+    )
+
     type: Literal["number"] = "number"
     field: Literal["textInput"] = "textInput"
-    placeHolder: Literal["0"] = "0"
+
+    placeHolder: Literal[
+        "0"
+    ] = "0"
 
     class Config:
         title = "QoS"
+
+
+# ================================================================
+# RETAIN DROPDOWN OPTIONS
+# ================================================================
 
 
 class RetainFalse(Config):
@@ -125,11 +157,16 @@ class RetainTrue(Config):
 
 class Retain(Config):
     """
-    Determines whether the broker retains the message.
+    Broker'ın mesajı retain edip etmeyeceğini belirler.
     """
 
     name: Literal["retain"] = "retain"
-    value: Union[RetainFalse, RetainTrue]
+
+    value: Union[
+        RetainFalse,
+        RetainTrue,
+    ]
+
     type: Literal["object"] = "object"
     field: Literal["dropdownlist"] = "dropdownlist"
 
@@ -139,14 +176,22 @@ class Retain(Config):
 
 class Timeout(Config):
     """
-    MQTT connection/publish timeout.
+    MQTT bağlantı ve publish timeout süresi.
     """
 
     name: Literal["timeout"] = "timeout"
-    value: float = Field(default=0.5, gt=0)
+
+    value: float = Field(
+        default=0.5,
+        gt=0,
+    )
+
     type: Literal["number"] = "number"
     field: Literal["textInput"] = "textInput"
-    placeHolder: Literal["0.5"] = "0.5"
+
+    placeHolder: Literal[
+        "0.5"
+    ] = "0.5"
 
     class Config:
         title = "Timeout"
@@ -154,11 +199,17 @@ class Timeout(Config):
 
 class Username(Config):
     """
-    Optional MQTT broker username.
+    Opsiyonel MQTT kullanıcı adı.
+
+    Boş bırakılabilir.
     """
 
     name: Literal["username"] = "username"
-    value: Optional[str] = None
+
+    # Optional[str] = None yerine boş string default kullanıyoruz.
+    # Böylece model tarafında value alanı her zaman tanımlıdır.
+    value: str = ""
+
     type: Literal["string"] = "string"
     field: Literal["textInput"] = "textInput"
 
@@ -168,16 +219,25 @@ class Username(Config):
 
 class Password(Config):
     """
-    Optional MQTT broker password.
+    Opsiyonel MQTT şifresi.
+
+    Boş bırakılabilir.
     """
 
     name: Literal["password"] = "password"
-    value: Optional[str] = None
+
+    value: str = ""
+
     type: Literal["string"] = "string"
     field: Literal["textInput"] = "textInput"
 
     class Config:
         title = "Password"
+
+
+# ================================================================
+# EXECUTOR CONFIGS
+# ================================================================
 
 
 class MQTTWriterConfigs(Configs):
@@ -195,14 +255,22 @@ class MQTTWriterConfigs(Configs):
 # OUTPUTS
 # ================================================================
 
+
 class ErrorStatusOutput(Output):
     """
-    True if publishing fails, False if publishing succeeds.
+    Publish işlemi başarısızsa True,
+    başarılıysa False.
     """
 
-    name: Literal["errorStatus"] = "errorStatus"
+    name: Literal[
+        "errorStatus"
+    ] = "errorStatus"
+
     value: bool
-    type: Literal["bool"] = "bool"
+
+    type: Literal[
+        "bool"
+    ] = "bool"
 
     class Config:
         title = "Error Status"
@@ -210,12 +278,18 @@ class ErrorStatusOutput(Output):
 
 class MessageOutput(Output):
     """
-    MQTT Writer status message.
+    MQTT Writer durum mesajı.
     """
 
-    name: Literal["message"] = "message"
+    name: Literal[
+        "message"
+    ] = "message"
+
     value: str
-    type: Literal["string"] = "string"
+
+    type: Literal[
+        "string"
+    ] = "string"
 
     class Config:
         title = "Message"
@@ -227,20 +301,30 @@ class PackageOutputs(Outputs):
 
 
 # ================================================================
-# REQUEST / RESPONSE
+# REQUEST
 # ================================================================
 
+
 class PackageRequest(Request):
-    # NovaVision tarafında input henüz oluşmamışken de
-    # modelin oluşturulabilmesi için optional.
-    inputs: Optional[PackageInputs] = None
+    """
+    MQTTWriter executor request modeli.
+    """
+
+    inputs: Optional[
+        PackageInputs
+    ] = None
 
     configs: MQTTWriterConfigs
 
     class Config:
         json_schema_extra = {
-            "target": "configs"
+            "target": "configs",
         }
+
+
+# ================================================================
+# RESPONSE
+# ================================================================
 
 
 class PackageResponse(Response):
@@ -251,35 +335,64 @@ class PackageResponse(Response):
 # EXECUTOR
 # ================================================================
 
+
 class MQTTWriterExecutor(Config):
-    name: Literal["MQTTWriter"] = "MQTTWriter"
+    """
+    MQTTWriter Request ve Response modellerini
+    tek executor altında toplar.
+    """
+
+    name: Literal[
+        "MQTTWriter"
+    ] = "MQTTWriter"
 
     value: Union[
         PackageRequest,
         PackageResponse,
     ]
 
-    type: Literal["object"] = "object"
-    field: Literal["option"] = "option"
+    type: Literal[
+        "object"
+    ] = "object"
+
+    field: Literal[
+        "option"
+    ] = "option"
 
     class Config:
         title = "MQTT Writer"
 
         json_schema_extra = {
             "target": {
-                "value": 0
+                "value": 0,
             }
         }
 
 
+# ================================================================
+# CONFIG EXECUTOR
+# ================================================================
+
+
 class ConfigExecutor(Config):
-    name: Literal["ConfigExecutor"] = "ConfigExecutor"
+    """
+    Package'ın executor seçimini tanımlar.
+
+    Package tek executor içerdiği için
+    target değeri "value" olmalıdır.
+    """
+
+    name: Literal[
+        "ConfigExecutor"
+    ] = "ConfigExecutor"
 
     value: Union[
         MQTTWriterExecutor
     ]
 
-    type: Literal["executor"] = "executor"
+    type: Literal[
+        "executor"
+    ] = "executor"
 
     field: Literal[
         "dependentDropdownlist"
@@ -289,20 +402,35 @@ class ConfigExecutor(Config):
         title = "Task"
 
         json_schema_extra = {
-            "target": "value"
+            "target": "value",
         }
 
 
 # ================================================================
-# PACKAGE
+# PACKAGE CONFIGS
 # ================================================================
+
 
 class PackageConfigs(Configs):
     executor: ConfigExecutor
 
 
+# ================================================================
+# PACKAGE MODEL
+# ================================================================
+
+
 class PackageModel(Package):
+    """
+    NovaVision MQTT Writer component modeli.
+    """
+
     configs: PackageConfigs
 
-    type: Literal["component"] = "component"
-    name: Literal["MQTTWriter"] = "MQTTWriter"
+    type: Literal[
+        "component"
+    ] = "component"
+
+    name: Literal[
+        "MQTTWriter"
+    ] = "MQTTWriter"

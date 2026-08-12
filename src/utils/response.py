@@ -13,39 +13,45 @@ from components.MQTTWriter.src.models.PackageModel import (
 
 
 def build_response(context):
+    """
+    MQTTWriter executor sonucunu
+    NovaVision PackageModel yapısına dönüştürür.
+    """
 
-    error_status = ErrorStatusOutput(
+    error_status_output = ErrorStatusOutput(
         value=context.error_status
     )
 
-    message = MessageOutput(
+    message_output = MessageOutput(
         value=context.response_message
     )
 
-    outputs = PackageOutputs(
-        errorStatus=error_status,
-        message=message,
+    package_outputs = PackageOutputs(
+        errorStatus=error_status_output,
+        message=message_output,
     )
 
     package_response = PackageResponse(
-        outputs=outputs
+        outputs=package_outputs
     )
 
     mqtt_writer_executor = MQTTWriterExecutor(
         value=package_response
     )
 
-    executor = ConfigExecutor(
+    config_executor = ConfigExecutor(
         value=mqtt_writer_executor
     )
 
     package_configs = PackageConfigs(
-        executor=executor
+        executor=config_executor
     )
 
-    package = PackageHelper(
+    package_helper = PackageHelper(
         packageModel=PackageModel,
         packageConfigs=package_configs,
     )
 
-    return package.build_model(context)
+    return package_helper.build_model(
+        context
+    )
