@@ -13,6 +13,7 @@ from components.MQTTWriter.src.models.PackageModel import (
 
 
 def build_response(context):
+
     error_status = ErrorStatusOutput(
         value=context.error_status
     )
@@ -22,7 +23,7 @@ def build_response(context):
     )
 
     outputs = PackageOutputs(
-        error_status=error_status,
+        errorStatus=error_status,
         message=message,
     )
 
@@ -47,6 +48,4 @@ def build_response(context):
         packageConfigs=package_configs,
     )
 
-    package_model = package.build_model(context)
-
-    return package_model
+    return package.build_model(context)

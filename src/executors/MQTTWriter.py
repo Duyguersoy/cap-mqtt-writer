@@ -22,23 +22,24 @@ from components.MQTTWriter.src.models.PackageModel import PackageModel
 class MQTTWriter(Component):
 
     def __init__(self, request, bootstrap):
+
         super().__init__(request, bootstrap)
 
         self.request.model = PackageModel(
             **self.request.data
         )
 
-        # ----------------------------------------------------------
+        # ==========================================================
         # INPUT
-        # ----------------------------------------------------------
+        # ==========================================================
 
         self.message = self.request.get_param(
             "message"
         )
 
-        # ----------------------------------------------------------
+        # ==========================================================
         # CONFIGS
-        # ----------------------------------------------------------
+        # ==========================================================
 
         self.host = self.request.get_param(
             "host"
@@ -72,9 +73,9 @@ class MQTTWriter(Component):
             "password"
         )
 
-        # ----------------------------------------------------------
-        # OUTPUT VALUES
-        # ----------------------------------------------------------
+        # ==========================================================
+        # OUTPUT STATE
+        # ==========================================================
 
         self.error_status = False
         self.response_message = ""
@@ -91,9 +92,6 @@ class MQTTWriter(Component):
 
 
     def create_client(self):
-        """
-        Creates and configures the MQTT client.
-        """
 
         client = mqtt.Client(
             mqtt.CallbackAPIVersion.VERSION2
@@ -104,6 +102,7 @@ class MQTTWriter(Component):
         )
 
         if self.username:
+
             client.username_pw_set(
                 username=self.username,
                 password=self.password,
@@ -113,19 +112,16 @@ class MQTTWriter(Component):
 
 
     def publish_message(self):
-        """
-        Connects to the MQTT broker and publishes
-        the input message.
-        """
 
         client = None
 
         try:
+
             client = self.create_client()
 
-            # ------------------------------------------------------
+            # ======================================================
             # CONNECT
-            # ------------------------------------------------------
+            # ======================================================
 
             client.connect(
                 host=self.host,
@@ -135,7 +131,6 @@ class MQTTWriter(Component):
 
             client.loop_start()
 
-            # Wait until the broker connection is established.
             connection_deadline = (
                 time.monotonic()
                 + float(self.timeout)
@@ -143,19 +138,17 @@ class MQTTWriter(Component):
 
             while not client.is_connected():
 
-                if (
-                    time.monotonic()
-                    >= connection_deadline
-                ):
+                if time.monotonic() >= connection_deadline:
+
                     raise TimeoutError(
                         "MQTT broker connection timed out."
                     )
 
                 time.sleep(0.01)
 
-            # ------------------------------------------------------
+            # ======================================================
             # PUBLISH
-            # ------------------------------------------------------
+            # ======================================================
 
             publish_info = client.publish(
                 topic=self.topic,
@@ -164,10 +157,8 @@ class MQTTWriter(Component):
                 retain=bool(self.retain),
             )
 
-            if (
-                publish_info.rc
-                != mqtt.MQTT_ERR_SUCCESS
-            ):
+            if publish_info.rc != mqtt.MQTT_ERR_SUCCESS:
+
                 raise RuntimeError(
                     "MQTT publish request failed "
                     f"with code {publish_info.rc}."
@@ -178,13 +169,14 @@ class MQTTWriter(Component):
             )
 
             if not publish_info.is_published():
+
                 raise TimeoutError(
                     "MQTT publish operation timed out."
                 )
 
-            # ------------------------------------------------------
+            # ======================================================
             # SUCCESS
-            # ------------------------------------------------------
+            # ======================================================
 
             self.error_status = False
 
@@ -195,7 +187,6 @@ class MQTTWriter(Component):
         except Exception as exc:
 
             self.error_status = True
-
             self.response_message = str(exc)
 
         finally:
@@ -217,14 +208,15 @@ class MQTTWriter(Component):
 
         self.publish_message()
 
-        package_model = build_response(
+        return build_response(
             context=self
         )
 
-        return package_model
-
 
 if __name__ == "__main__":
+
     from sdks.novavision.src.helper.executor import Executor
 
-    Executor(sys.argv[1]).run()
+    Executor(
+        sys.argv[1]
+    ).run()
