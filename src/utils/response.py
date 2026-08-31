@@ -1,50 +1,41 @@
+"""Response builder for Detection To JSON."""
+
 from sdks.novavision.src.helper.package import PackageHelper
 
-from components.MQTTWriter.src.models.PackageModel import (
-    PackageModel,
-    PackageConfigs,
+from components.DetectionToJSON.src.models.PackageModel import (
     ConfigExecutor,
+    DetectionToJSONExecutor,
+    OutputMessage,
+    PackageConfigs,
+    PackageModel,
     PackageOutputs,
     PackageResponse,
-    MQTTWriterExecutor,
-    ErrorStatusOutput,
-    MessageOutput,
 )
 
 
 def build_response(context):
-    """
-    MQTTWriter executor sonucunu
-    NovaVision PackageModel yapısına dönüştürür.
-    """
-
-    error_status_output = ErrorStatusOutput(
-        value=context.error_status
+    output_message = OutputMessage(
+        value=context.output_message
     )
 
-    message_output = MessageOutput(
-        value=context.response_message
-    )
-
-    package_outputs = PackageOutputs(
-        errorStatus=error_status_output,
-        message=message_output,
+    outputs = PackageOutputs(
+        outputMessage=output_message
     )
 
     package_response = PackageResponse(
-        outputs=package_outputs
+        outputs=outputs
     )
 
-    mqtt_writer_executor = MQTTWriterExecutor(
+    component_executor = DetectionToJSONExecutor(
         value=package_response
     )
 
-    config_executor = ConfigExecutor(
-        value=mqtt_writer_executor
+    executor = ConfigExecutor(
+        value=component_executor
     )
 
     package_configs = PackageConfigs(
-        executor=config_executor
+        executor=executor
     )
 
     package_helper = PackageHelper(
@@ -52,6 +43,4 @@ def build_response(context):
         packageConfigs=package_configs,
     )
 
-    return package_helper.build_model(
-        context
-    )
+    return package_helper.build_model(context)
