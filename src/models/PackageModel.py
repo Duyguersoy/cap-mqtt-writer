@@ -22,7 +22,7 @@ from sdks.novavision.src.base.model import (
 
 class MessageInput(Input):
     """
-    MQTT broker'a publish edilecek mesaj.
+    Message content to be published to the MQTT broker.
     """
 
     name: Literal["message"] = "message"
@@ -44,7 +44,8 @@ class PackageInputs(Inputs):
 
 class Host(Config):
     """
-    MQTT broker host adresi.
+    Specifies the hostname or IP address of the MQTT broker
+    that the client connects to for publishing messages.
     """
 
     name: Literal["host"] = "host"
@@ -59,10 +60,14 @@ class Host(Config):
     class Config:
         title = "Host"
 
+        json_schema_extra = {
+            "shortDescription": "MQTT Broker Host"
+        }
+
 
 class Port(Config):
     """
-    MQTT broker portu.
+    Specifies the network port used to connect to the MQTT broker.
     """
 
     name: Literal["port"] = "port"
@@ -83,10 +88,14 @@ class Port(Config):
     class Config:
         title = "Port"
 
+        json_schema_extra = {
+            "shortDescription": "MQTT Broker Port"
+        }
+
 
 class Topic(Config):
     """
-    Mesajın yayınlanacağı MQTT topic.
+    Specifies the MQTT topic to which messages are published.
     """
 
     name: Literal["topic"] = "topic"
@@ -101,10 +110,14 @@ class Topic(Config):
     class Config:
         title = "Topic"
 
+        json_schema_extra = {
+            "shortDescription": "Publish Topic"
+        }
+
 
 class QoS(Config):
     """
-    MQTT Quality of Service seviyesi.
+    Specifies the MQTT Quality of Service level used for message delivery.
 
     0 -> At most once
     1 -> At least once
@@ -129,6 +142,10 @@ class QoS(Config):
     class Config:
         title = "QoS"
 
+        json_schema_extra = {
+            "shortDescription": "Quality of Service Level"
+        }
+
 
 # ================================================================
 # RETAIN DROPDOWN OPTIONS
@@ -136,6 +153,10 @@ class QoS(Config):
 
 
 class RetainFalse(Config):
+    """
+    Represents the disabled retain option.
+    """
+
     name: Literal["False"] = "False"
     value: Literal[False] = False
     type: Literal["bool"] = "bool"
@@ -146,6 +167,10 @@ class RetainFalse(Config):
 
 
 class RetainTrue(Config):
+    """
+    Represents the enabled retain option.
+    """
+
     name: Literal["True"] = "True"
     value: Literal[True] = True
     type: Literal["bool"] = "bool"
@@ -157,7 +182,8 @@ class RetainTrue(Config):
 
 class Retain(Config):
     """
-    Broker'ın mesajı retain edip etmeyeceğini belirler.
+    Determines whether the MQTT broker should retain
+    the published message for future subscribers.
     """
 
     name: Literal["retain"] = "retain"
@@ -173,10 +199,15 @@ class Retain(Config):
     class Config:
         title = "Retain"
 
+        json_schema_extra = {
+            "shortDescription": "Retain Published Message"
+        }
+
 
 class Timeout(Config):
     """
-    MQTT bağlantı ve publish timeout süresi.
+    Specifies the timeout duration for MQTT connection
+    and publish operations.
     """
 
     name: Literal["timeout"] = "timeout"
@@ -196,18 +227,22 @@ class Timeout(Config):
     class Config:
         title = "Timeout"
 
+        json_schema_extra = {
+            "shortDescription": "Connection Timeout"
+        }
+
 
 class Username(Config):
     """
-    Opsiyonel MQTT kullanıcı adı.
+    Optional username used to authenticate with the MQTT broker.
 
-    Boş bırakılabilir.
+    This field may be left empty when authentication is not required.
     """
 
     name: Literal["username"] = "username"
 
-    # Optional[str] = None yerine boş string default kullanıyoruz.
-    # Böylece model tarafında value alanı her zaman tanımlıdır.
+    # An empty string is used instead of Optional[str] = None
+    # so that the value field is always defined in the model.
     value: str = ""
 
     type: Literal["string"] = "string"
@@ -216,12 +251,16 @@ class Username(Config):
     class Config:
         title = "Username"
 
+        json_schema_extra = {
+            "shortDescription": "Broker Username"
+        }
+
 
 class Password(Config):
     """
-    Opsiyonel MQTT şifresi.
+    Optional password used to authenticate with the MQTT broker.
 
-    Boş bırakılabilir.
+    This field may be left empty when authentication is not required.
     """
 
     name: Literal["password"] = "password"
@@ -234,6 +273,10 @@ class Password(Config):
     class Config:
         title = "Password"
 
+        json_schema_extra = {
+            "shortDescription": "Broker Password"
+        }
+
 
 # ================================================================
 # EXECUTOR CONFIGS
@@ -241,6 +284,10 @@ class Password(Config):
 
 
 class MQTTWriterConfigs(Configs):
+    """
+    Contains all MQTT connection and publishing configuration parameters.
+    """
+
     host: Host
     port: Port
     topic: Topic
@@ -258,8 +305,10 @@ class MQTTWriterConfigs(Configs):
 
 class ErrorStatusOutput(Output):
     """
-    Publish işlemi başarısızsa True,
-    başarılıysa False.
+    Indicates whether the MQTT publish operation failed.
+
+    Returns True when an error occurs and False when the message
+    is published successfully.
     """
 
     name: Literal[
@@ -278,7 +327,7 @@ class ErrorStatusOutput(Output):
 
 class MessageOutput(Output):
     """
-    MQTT Writer durum mesajı.
+    Provides the status message generated by the MQTT Writer operation.
     """
 
     name: Literal[
@@ -296,6 +345,10 @@ class MessageOutput(Output):
 
 
 class PackageOutputs(Outputs):
+    """
+    Contains the outputs returned by the MQTT Writer executor.
+    """
+
     errorStatus: ErrorStatusOutput
     message: MessageOutput
 
@@ -307,7 +360,7 @@ class PackageOutputs(Outputs):
 
 class PackageRequest(Request):
     """
-    MQTTWriter executor request modeli.
+    Defines the request model used by the MQTT Writer executor.
     """
 
     inputs: Optional[
@@ -328,6 +381,10 @@ class PackageRequest(Request):
 
 
 class PackageResponse(Response):
+    """
+    Defines the response model returned by the MQTT Writer executor.
+    """
+
     outputs: PackageOutputs
 
 
@@ -338,8 +395,8 @@ class PackageResponse(Response):
 
 class MQTTWriterExecutor(Config):
     """
-    MQTTWriter Request ve Response modellerini
-    tek executor altında toplar.
+    Combines the MQTT Writer request and response models
+    under a single executor definition.
     """
 
     name: Literal[
@@ -376,10 +433,10 @@ class MQTTWriterExecutor(Config):
 
 class ConfigExecutor(Config):
     """
-    Package'ın executor seçimini tanımlar.
+    Defines the executor selection for the package.
 
-    Package tek executor içerdiği için
-    target değeri "value" olmalıdır.
+    Since the package contains a single executor, the target
+    is set to "value".
     """
 
     name: Literal[
@@ -412,6 +469,10 @@ class ConfigExecutor(Config):
 
 
 class PackageConfigs(Configs):
+    """
+    Contains the executor configuration for the package.
+    """
+
     executor: ConfigExecutor
 
 
@@ -422,7 +483,11 @@ class PackageConfigs(Configs):
 
 class PackageModel(Package):
     """
-    NovaVision MQTT Writer component modeli.
+    Defines the NovaVision MQTT Writer component package model.
+
+    The package publishes string messages to an MQTT broker using
+    configurable connection, topic, QoS, retain, timeout, and
+    authentication parameters.
     """
 
     configs: PackageConfigs

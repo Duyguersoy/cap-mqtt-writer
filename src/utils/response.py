@@ -14,8 +14,8 @@ from components.MQTTWriter.src.models.PackageModel import (
 
 def build_response(context):
     """
-    MQTTWriter executor sonucunu
-    NovaVision PackageModel yapısına dönüştürür.
+    Converts the MQTT Writer execution result
+    into the NovaVision PackageModel response structure.
     """
 
     error_status_output = ErrorStatusOutput(

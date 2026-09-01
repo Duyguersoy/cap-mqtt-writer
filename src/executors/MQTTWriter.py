@@ -29,8 +29,8 @@ else:
 
 class MQTTWriter(Component):
     """
-    NovaVision workflow üzerinden gelen string mesajı
-    MQTT broker'a publish eder.
+    Publishes string messages received from a NovaVision workflow
+    to an MQTT broker.
     """
 
     def __init__(self, request, bootstrap):
@@ -66,7 +66,7 @@ class MQTTWriter(Component):
 
     def get_optional_param(self, name, default=""):
         """
-        Opsiyonel config alanlarını güvenli biçimde okur.
+        Safely retrieves optional configuration parameters.
         """
 
         try:
@@ -82,8 +82,8 @@ class MQTTWriter(Component):
     @staticmethod
     def unwrap_value(value):
         """
-        NovaVision dropdown/config wrapper nesnelerinin
-        içindeki gerçek value değerini çözer.
+        Extracts the actual value from NovaVision
+        dropdown or configuration wrapper objects.
         """
 
         visited = set()
@@ -101,8 +101,8 @@ class MQTTWriter(Component):
 
     def normalize_retain(self):
         """
-        Retain config değerini güvenli boolean
-        değerine dönüştürür.
+        Converts the retain configuration value
+        into a valid boolean value.
         """
 
         value = self.unwrap_value(self.retain)
@@ -141,8 +141,8 @@ class MQTTWriter(Component):
 
     def validate_configs(self):
         """
-        MQTT connection ve publish ayarlarını
-        runtime'da doğrular.
+        Validates MQTT connection and publishing
+        configuration values at runtime.
         """
 
         host = str(self.host).strip()
@@ -203,7 +203,7 @@ class MQTTWriter(Component):
 
     def create_client(self):
         """
-        Paho MQTT client oluşturur.
+        Creates and configures a Paho MQTT client.
         """
 
         client = mqtt.Client(
@@ -220,8 +220,8 @@ class MQTTWriter(Component):
 
     def wait_for_connection(self, client):
         """
-        Broker bağlantısının belirtilen timeout
-        süresi içinde kurulmasını bekler.
+        Waits for the MQTT broker connection to be established
+        within the configured timeout period.
         """
 
         deadline = (
@@ -239,7 +239,8 @@ class MQTTWriter(Component):
 
     def publish_message(self):
         """
-        Gelen string mesajı MQTT broker'a publish eder.
+        Publishes the incoming string message
+        to the configured MQTT broker and topic.
         """
 
         client = None
@@ -305,6 +306,11 @@ class MQTTWriter(Component):
                     pass
 
     def run(self):
+        """
+        Executes the MQTT publish operation
+        and returns the NovaVision response.
+        """
+
         self.publish_message()
 
         return build_response(
